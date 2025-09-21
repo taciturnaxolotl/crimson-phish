@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="favicon.png" />
+        <title>MyCCU Change Password</title>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="loginstyles.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <header>
+            <a href="index.html"
+                ><img src="banner.png" alt="" width="500px"
+            /></a>
+        </header>
+
+        <div class="header">
+            <h1>Welcome to MyCCU</h1>
+        </div>
+
+        <div class="login-wrapper">
+            <div class="login-container">
+                <h2>Change Password</h2>
+                <div class="loginForm">
+                    <p>
+                        Hello Jeffrey Barrett, please enter your current
+                        password and choose a new password.
+                    </p>
+                    <form id="resetForm">
+                        <div class="form-group">
+                            <label>Current Password</label>
+                            <input
+                                type="password"
+                                name="current_password"
+                                class="form-control"
+                                required
+                            />
+                            <span class="help-block"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input
+                                type="password"
+                                name="new_password"
+                                class="form-control"
+                                required
+                            />
+                            <span class="help-block"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input
+                                type="password"
+                                name="confirm_password"
+                                class="form-control"
+                                required
+                            />
+                            <span class="help-block"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <input
+                                type="submit"
+                                class="btn btn-primary"
+                                value="Change Password"
+                            />
+                        </div>
+
+                        <p>
+                            <a
+                                href="http://crimsonchallenge.duckdns.org/login.php"
+                                >Back to Login</a
+                            >.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document
+                .getElementById("resetForm")
+                .addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const currentPassword = formData.get("current_password");
+                    const newPassword = formData.get("new_password");
+                    const confirmPassword = formData.get("confirm_password");
+
+                    // Clear previous errors
+                    document
+                        .querySelectorAll(".form-group")
+                        .forEach((group) => {
+                            group.classList.remove("has-error");
+                            const helpBlock =
+                                group.querySelector(".help-block");
+                            if (helpBlock) {
+                                helpBlock.textContent = "";
+                            }
+                        });
+
+                    // Validate password confirmation
+                    if (newPassword !== confirmPassword) {
+                        const confirmGroup =
+                            document.querySelectorAll(".form-group")[2];
+                        const helpBlock =
+                            confirmGroup.querySelector(".help-block");
+                        if (helpBlock) {
+                            helpBlock.textContent =
+                                "New passwords do not match.";
+                            confirmGroup.classList.add("has-error");
+                        }
+                        return;
+                    }
+
+                    // Validate password strength (optional)
+                    if (newPassword.length < 8) {
+                        const newPasswordGroup =
+                            document.querySelectorAll(".form-group")[1];
+                        const helpBlock =
+                            newPasswordGroup.querySelector(".help-block");
+                        if (helpBlock) {
+                            helpBlock.textContent =
+                                "New password must be at least 8 characters long.";
+                            newPasswordGroup.classList.add("has-error");
+                        }
+                        return;
+                    }
+
+                    // Prepare data for API
+                    const apiData = {
+                        username: "jbarrett",
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                    };
+
+                    // Make the request to our Bun API
+                    fetch("/api/change-password", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(apiData),
+                    })
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                alert("Password changed successfully!");
+                                // Redirect to the target site
+                                window.location.href =
+                                    "https://www.youtube.com/watch?v=E4WlUXrJgy4";
+                            } else {
+                                // Show error on appropriate field
+                                if (data.field === "current_password") {
+                                    const currentGroup =
+                                        document.querySelectorAll(
+                                            ".form-group",
+                                        )[0];
+                                    const helpBlock =
+                                        currentGroup.querySelector(
+                                            ".help-block",
+                                        );
+                                    if (helpBlock) {
+                                        helpBlock.textContent =
+                                            data.message ||
+                                            "Current password is incorrect.";
+                                        currentGroup.classList.add("has-error");
+                                    }
+                                } else {
+                                    const newPasswordGroup =
+                                        document.querySelectorAll(
+                                            ".form-group",
+                                        )[1];
+                                    const helpBlock =
+                                        newPasswordGroup.querySelector(
+                                            ".help-block",
+                                        );
+                                    if (helpBlock) {
+                                        helpBlock.textContent =
+                                            data.message ||
+                                            "An error occurred. Please try again.";
+                                        newPasswordGroup.classList.add(
+                                            "has-error",
+                                        );
+                                    }
+                                }
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error:", error);
+                            const currentGroup =
+                                document.querySelectorAll(".form-group")[0];
+                            const helpBlock =
+                                currentGroup.querySelector(".help-block");
+                            if (helpBlock) {
+                                helpBlock.textContent =
+                                    "Network error. Please try again.";
+                                currentGroup.classList.add("has-error");
+                            }
+                        });
+                });
+
+            // Clear error state when user starts typing
+            document
+                .querySelectorAll('input[type="password"]')
+                .forEach((input) => {
+                    input.addEventListener("input", function () {
+                        const formGroup = this.closest(".form-group");
+                        if (formGroup) {
+                            formGroup.classList.remove("has-error");
+                            const helpBlock =
+                                formGroup.querySelector(".help-block");
+                            if (helpBlock) {
+                                helpBlock.textContent = "";
+                            }
+                        }
+                    });
+                });
+        </script>
+    </body>
+</html>
