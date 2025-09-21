@@ -1,0 +1,21 @@
+{
+  "name": "phishing-simulator",
+  "version": "1.0.0",
+  "description": "A phishing simulation for educational purposes",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --hot run index.ts"
+  },
+  "dependencies": {
+    "bun": "latest"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
